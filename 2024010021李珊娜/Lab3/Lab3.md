@@ -149,8 +149,8 @@ Windows / Git Bash                          Ubuntu 虚拟机
 
 | 认证事件 | 日志时间 | 尝试登录的账号 | 来源 IP | 结果关键词 | 日志来源 |
 | :--- | :--- | :--- | :--- | :--- | :--- |
-| 成功认证 | | | | | |
-| 失败认证 | | | | | |
+| 成功认证 | 2026-09-22 15:21:16|lsn | 192.168.246.1 |Accepted password |journalctl -u ssh 与 /var/log/auth.log |
+| 失败认证 |2026-09-22 15:21:11|lsn | 192.168.246.1  |Failed password | journalctl -u ssh 与 /var/log/auth.log |
 
 保存 `imgs/lab3_ssh_auth.png`，保留 journal 与 `auth.log` 的查询命令及本人成功、失败记录。两处输出**合起来**能辨认本人一次成功认证和一次失败认证即可，不要求每一处都同时出现两条记录。
 
@@ -197,10 +197,10 @@ sudo grep "student_id=你的学号" /var/log/syslog | tail -n 5
 
 | 项目 | 你的记录 |
 | :--- | :--- |
-| journal 中是否查到 | |
-| `/var/log/syslog` 中是否查到 | |
-| 两处记录有哪些共同字段或正文 | |
-| 两处输出的主要区别 | |
+| journal 中是否查到 | 是|
+| `/var/log/syslog` 中是否查到 |是 |
+| 两处记录有哪些共同字段或正文 |主机名 lsn-VMware-Virtual-Platform、标签 lab3_read、正文 student_id=2024010021 name=李珊娜 action=write_test result=success 完全相 |
+| 两处输出的主要区别 | journal 时间格式为"9月 22 15:22:06"，并带进程号 [6204]；syslog 时间为 ISO 8601 完整格式 2026-09-22T15:22:06.170784+08:00（带年份、微秒、+08:00 时区），不带进程号|
 
 保存 `imgs/lab3_dual_pipeline.png`，在同一张截图中保留 `logger` 命令、journal 和 syslog 两处查询结果，结果必须包含本人学号姓名。
 
@@ -274,8 +274,8 @@ Sep  8 10:15:32 ubuntu lab3_read[2310]: student_id=20260001 name=张三 action=w
 **本题填写：**
 
 ```text
-获取命令：
-日志原文：
+获取命令：sudo grep "student_id=2024010021" /var/log/syslog | tail -n 5
+日志原文：2026-09-22T15:22:06.170784+08:00 lsn-VMware-Virtual-Platform lab3_read: student_id=2024010021 name=李珊娜 action=write_test result=success
 ```
 
 | 4W1R | 根据本人原始日志填写 |
@@ -305,8 +305,8 @@ sudo grep -E "Accepted|Failed password|sudo" /var/log/auth.log | tail -n 30
 **本题填写：**
 
 ```text
-获取命令：
-日志原文：
+获取命令：sudo grep -E "Accepted|Failed password" /var/log/auth.log | tail -n 20
+日志原文：2026-09-22T15:21:11.723709+08:00 lsn-VMware-Virtual-Platform sshd[6141]: Failed password for lsn from 192.168.246.1 port 60976 ssh2
 ```
 
 | 4W1R | 根据本人原始日志填写 |
@@ -371,15 +371,15 @@ sudo journalctl -k -b -n 30 --no-pager
 **本题填写：**
 
 ```text
-实际日志来源（使用替代来源时说明原因）：
-获取命令：
-日志原文：
+实际日志来源（使用替代来源时说明原因）：/var/log/dpkg.log 中 htop 软件包安装完成状态记录。
+获取命令：grep "htop" /var/log/dpkg.log | tail -n 10
+日志原文：2026-09-22 15:26:34 status installed htop:amd64 3.3.0-4build1
 ```
 
 | 4W1R | 根据本人原始日志填写 |
 | :--- | :--- |
 | When 什么时候 | 2026 年 9 月 22 日 15:26:34；该日志未提供时区|
-| Where 在哪里 |该日志未提供主机名；可另注"从本人 Ubuntu 虚拟机的 /var/log/dpkg.log 取得 |
+| Where 在哪里 |该日志未提供主机名；可另注从本人 Ubuntu 虚拟机的 /var/log/dpkg.log 取得 |
 | Who 谁 |记录工具为 dpkg；该日志未提供执行操作的用户账号 |
 | What 做了什么 |记录 htop 软件包（amd64 架构，版本 3.3.0-4build1）的状态 |
 | Result 结果如何 |状态为 installed，即已安装。 |
@@ -509,40 +509,3 @@ sudo journalctl --since "2 hours ago" --no-pager | grep -E "sshd|Accepted|Failed
 
 ---
 
-## 八、截图与提交要求
-
-本次单独提交 **1 份 Markdown 报告和 2 张截图**。
-
-| 操作位置 | 截图必须体现的内容 | 文件名 |
-| :--- | :--- | :--- |
-| 3.1 节 | journal 与 `auth.log` 中本人成功、失败认证记录及查询命令（两处输出合起来有两条记录即可） | `lab3_ssh_auth.png` |
-| 3.2 节 | 含本人学号姓名的 `logger` 命令，以及 journal、syslog 两处查询结果 | `lab3_dual_pipeline.png` |
-
-- 使用电脑截图功能，文字清晰可读，严禁手机拍摄屏幕。
-- 截图应显示命令和对应输出，并能辨认本人账号或学号姓名。
-- 可合理拼图或裁剪无关区域，但不能裁掉命令、时间或关键结果。
-- 使用本人实验结果，截图中不得出现密码、私钥或访问令牌。
-- 图片保存在 `imgs/`，文件名、扩展名和大小写与表格一致。
-
-提交前确认自己的文件夹结构为：
-
-```text
-学号姓名/
-└── Lab3/
-    ├── Lab3.md
-    └── imgs/
-        ├── lab3_ssh_auth.png
-        └── lab3_dual_pipeline.png
-```
-
-检查第三节的认证和对照结果、第四节的 3 份分析，以及第五节的 2 道简答题。每份分析都应保留获取命令、日志原文、4W1R 和简短解释；选读内容无需填写。
-
-打开 `Lab3.md`，确认两张图片能够显示，再按仓库 README 的流程单独提交 Lab3。PR 标题为 `[学号姓名]Lab3作业提交`，Lab2 仍使用自己的报告和 PR。
-
----
-
-## 九、截止时间
-
-**暂定：2026 年 9 月 24 日 23:59:59（北京时间）**
-
-请在截止前创建 Lab3 的 PR 并完成最后一次推送。提交时间按仓库 `README.md` 第 4 节规定，以最后一次推送到 PR 的时间计算。
